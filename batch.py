@@ -18,11 +18,15 @@ from types import MethodType, FrameType
 
 
 class Proxy:
-    def __init__(self, call=None, family=None):
+    def __init__(self, call=None, family=None, referent_name="?"):
         self.call = call or (lambda x: x)
         self.family = family
         if family is not None:
             family.append(self)
+        self.referent_name = referent_name
+
+    def __repr__(self):
+        return f"<Proxy:{self.referent_name}>"
 
     def replace(self, target):
         gc.collect()  # we can never get half-dead objects
@@ -41,13 +45,25 @@ class Proxy:
                 print("don't know how to patch", type(referrer))
 
     def __getitem__(self, item):
-        return Proxy(call=(lambda x, call=self.call: call(x)[item]), family=self.family)
+        return Proxy(
+            call=(lambda x, call=self.call: call(x)[item]),
+            family=self.family,
+            referent_name=f"{self.referent_name}[{item!r}]",
+        )
 
-    def __getattr__(self, item):
-        return Proxy(call=(lambda x, call=self.call: getattr(call(x), item)), family=self.family)
+    def __getattr__(self, attr):
+        return Proxy(
+            call=(lambda x, call=self.call: getattr(call(x), attr)),
+            family=self.family,
+            referent_name=f"{self.referent_name}.{attr}",
+        )
 
     def __call__(self, *args, **kwargs):
-        return Proxy(call=(lambda x, call=self.call: call(x)(*args, **kwargs)), family=self.family)
+        return Proxy(
+            call=(lambda x, call=self.call: call(x)(*args, **kwargs)),
+            family=self.family,
+            referent_name=f"{self.referent_name}(...)",
+        )
 
 
 missing = object()
@@ -73,7 +89,10 @@ class able:
             frame.f_locals["my_ables_raeT9ahL"].add(self)
             if len(self.unresolved) >= self.batch_size:
                 self.resolve()
-            return Proxy(family=self.unresolved.setdefault(id, []))
+            return Proxy(
+                family=self.unresolved.setdefault(id, []),
+                referent_name=f"{self.resolver.__name__}({id})",
+            )
 
         return wrapper
 
