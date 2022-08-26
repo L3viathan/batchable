@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "batchable"
-version = "0.1.0"
+version = "0.1.1"
 description = "Hide your batch logic away from the actual code."
 authors = ["L3viathan <git@l3vi.de>"]
 packages = [
