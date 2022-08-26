@@ -45,6 +45,7 @@ print(shop_lookup(42))
 
 source = [{"offer_id": offer_id, "shop_id": offer_id + 100, "brand_id": offer_id % 4} for offer_id in range(23)]
 results = []
+
 for result in transform_offer.many(source):
     print(result)
     results.append(result)

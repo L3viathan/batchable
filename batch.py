@@ -12,6 +12,9 @@ from types import MethodType, FrameType
 # - IDs (the values given to batch.able functions) need to be hashable
 # - must take care not to use results from batch.ed functions until loop has
 #   completed
+# - if the loop is interrupted prematurely (e.g. with break), you _must_ make
+#   sure there are no references to the generator (batched_thing.many())
+#   remaining, otherwise some remaining Proxy objects might stay around.
 
 
 class Proxy:
