@@ -16,17 +16,18 @@ def shop_lookup(shop_ids):
 
 
 @lru_cache(maxsize=None)
-@batch.able(batch_size=3)
+@batch.able(batch_size=3, default={"name": None})
 def brand_lookup(brand_ids):
     print("Looking up brands:", brand_ids)
+    # return {row["id"]: row for row in db.execute("SELECT id, name WHERE id = ANY({brand_ids})", {"brand_ids": tuple(brand_ids)})}
     return {
         brand_id: {
             "id": brand_id,
             "name": ["Apple", "Google", "Samsung", "Huawei"][brand_id],
         }
         for brand_id in brand_ids
+        if brand_id != 2
     }
-
 
 
 @batch.ed
@@ -43,4 +44,10 @@ def transform_offer(offer):
 print(shop_lookup(42))
 
 source = [{"offer_id": offer_id, "shop_id": offer_id + 100, "brand_id": offer_id % 4} for offer_id in range(23)]
-print(list(transform_offer.s(source)))
+results = []
+for result in transform_offer.many(source):
+    print(result)
+    results.append(result)
+print(results)
+# print(list(transform_offer.many(source)))
+# print(transform_offer(source[0]))
