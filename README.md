@@ -6,7 +6,8 @@ Allows hiding the batching logic of requests.
 pip install batchable
 ```
 
-This is the result of a learning day @ solute.
+This is the result of a learning day @ solute, together with
+[@digitalarbeiter](https://github.com/digitalarbeiter).
 
 ## Idea
 
@@ -98,7 +99,7 @@ def shop_lookup(shop_ids):
             "SELECT id, name FROM shops WHERE id=ANY({ids})",
             ids=tuple(shop_id),
         ),
-    )
+    }
 ```
 
 And then it just works.
