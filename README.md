@@ -92,7 +92,7 @@ it to handle _several_ IDs:
 
 ```python
 @batch.able(batch_size=10)
-def shop_lookup(shop_ids):
+def lookup_shop(shop_ids):
     return {
         row["id"]: dict(row)
         for row in db.execute(
