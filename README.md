@@ -76,18 +76,7 @@ you don't see. First, you import the library:
 import batch
 ```
 
-Then you mark the transformation function with the `batch.ed` decorator:
-
-```python
-@batch.ed
-def transform_offer(offer):
-    return {
-        "id": offer["offer_id"],
-        "shop_name": lookup_shop(offer["shop_id"])["name"],
-    }
-```
-
-And finally, you decorate the lookup function with `batch.able`, while changing
+Then you decorate the lookup function with `batch.able`, while changing
 it to handle _several_ IDs:
 
 ```python
@@ -102,12 +91,18 @@ def lookup_shop(shop_ids):
     }
 ```
 
-And then it just works.
+From the outside, you still call this function with a single shop ID, with no
+functional changes. You can, however, also call it inside a context manager:
 
-Note how you have to set a `batch_size` — we will actually make a call to this
-function once that many different IDs have been requested. You can also provide
-a `default=` argument to the decorator to set a default value for missing rows
-(otherwise missing rows will raise an exception).
+```python
+with batch.ed:
+    processed_offers = [transform_offer(offer) for offer in unprocessed_offers]
+```
+
+This is again functionally identical, _but_ `lookup_shop` gets called with (up
+to) 10 shop IDs at a time. You can also provide a `default=` argument to the
+decorator to set a default value for missing rows (otherwise missing rows will
+raise an exception).
 
 If you want, you can also add a cache to this function — make sure to add it
 _on top_ of the `@batch.able` decorator, so it caches per ID.
@@ -128,9 +123,6 @@ magic means however that there are limitations to this technique:
   asking the GC for references to the proxy, but in the meantime a different
   thread could have decremented the reference count, meaning we could get
   half-dead objects that haven't been reaped yet.
-- **performance:** performance hasn't been tested, but `gc.get_referrers()`
-  probably isn't that fast. It's usually gonna be faster than a database/API
-  roundtrip though.
 - **no tuples:** we only replace references in lists and dicts (including
   instance dictionaries). That means that we are not able to replace references
   in tuples. It would technically be possible to do this, but the way this
@@ -139,13 +131,10 @@ magic means however that there are limitations to this technique:
 - **IDs must be hashable:** probably a no-brainer, but the IDs used as
   arguments to the lookup functions must be hashable. They almost always are
   anyways.
-- **no intermediate use:** This is the most dangerous foot-gun. Make sure to
-  iterate over the function decorated with `batch.ed` completely and don't use
-  any objects yielded from it until it's done, because the proxies may not all
-  have been replaced yet. As a minor variant, you _are_ able to terminate the
-  loop early (e.g. via a `break`), but must make sure not to keep a reference
-  to the generator around. It's best just to iterate over it once, as shown
-  above.
+- **no intermediate use:** This is the most dangerous foot-gun. Make sure not
+  to use results of calling `transform_offer` _until you have left the context
+  manager_, because the proxies may not all have been replaced yet.
+
 
 ## Complete example
 

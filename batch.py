@@ -116,7 +116,7 @@ class ed:
     def __enter__(self):
         self.ables.append(set())
         sys._getframe().f_back.f_globals["my_ables_raeT9ahL"] = self.ables[-1]
-    
+
     def __exit__(self, exc, exct, tb):
         for a in self.ables.pop():
             a.resolve()
