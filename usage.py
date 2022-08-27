@@ -40,14 +40,21 @@ def transform_offer(offer):
     }
 
 
+# normal, unbatched lookup:
 print(shop_lookup(42))
 
-source = [{"offer_id": offer_id, "shop_id": offer_id + 100, "brand_id": offer_id % 4} for offer_id in range(23)]
+source = [
+    {"offer_id": offer_id, "shop_id": offer_id + 100, "brand_id": offer_id % 4}
+    for offer_id in range(23)
+]
 results = []
 
 with batch.ed:
     for row in source:
+        # batched lookups inside here:
         result = transform_offer(row)
+        # observe how (some of) the proxies are still there:
         print(result)
         results.append(result)
+# but now they're gone:
 print(results)

@@ -68,16 +68,16 @@ and finally enrich the half-processed offers with shop names.
 
 ------
 
-This project aims to solve this issue, by allowing you to write your code in a
-simple manner, and doing nasty things behind the scenes to enable batching that
-you don't see. First, you import the library:
+This project aims to solve this issue, by allowing you to write your code just
+like you normally would, and doing nasty things behind the scenes to enable
+batching that you don't see. First, you import the library:
 
 ```python
 import batch
 ```
 
-Then you decorate the lookup function with `batch.able`, while changing
-it to handle _several_ IDs:
+Then you decorate the function you want to batch with `batch.able`, while
+changing it to handle _several_ IDs:
 
 ```python
 @batch.able(batch_size=10)
@@ -91,8 +91,8 @@ def lookup_shop(shop_ids):
     }
 ```
 
-From the outside, you still call this function with a single shop ID, with no
-functional changes. You can, however, also call it inside a context manager:
+You still call this function with a single shop ID, with no functional changes.
+You can, however, also call it inside a context manager:
 
 ```python
 with batch.ed:
@@ -111,7 +111,8 @@ _on top_ of the `@batch.able` decorator, so it caches per ID.
 ## Caveats
 
 The way this works is by having the lookup function return `Proxy` objects that
-are later magically replaced by the actual object. The proxy knows about
+are later (either when the batch size is reached, or when leaving the context
+manager) magically replaced by the actual object. The proxy knows about
 indexing and attribute access, so that will just work as well. The level of
 magic means however that there are limitations to this technique:
 

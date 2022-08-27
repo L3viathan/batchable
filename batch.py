@@ -1,20 +1,7 @@
 import sys
 import gc
+import warnings
 from types import MethodType, FrameType
-
-
-# CAVEATS:
-# - not thread-safe (probably)
-# - performance of gc.get_referrers() is probably not great (although likely
-#   faster than a database roundtrip)
-# - can't change values in tuples (could probably make this work, but there's
-#   enough magic going on already)
-# - IDs (the values given to batch.able functions) need to be hashable
-# - must take care not to use results from batch.ed functions until loop has
-#   completed
-# - if the loop is interrupted prematurely (e.g. with break), you _must_ make
-#   sure there are no references to the generator (batched_thing.many())
-#   remaining, otherwise some remaining Proxy objects might stay around.
 
 
 class Proxy:
@@ -29,7 +16,7 @@ class Proxy:
         return f"<Proxy:{self.referent_name}>"
 
     def replace(self, target):
-        gc.collect()  # we can never get half-dead objects
+        gc.collect()  # so we can never get half-dead objects
         for referrer in gc.get_referrers(self):
             if isinstance(referrer, dict):
                 for key in list(referrer):
@@ -42,7 +29,7 @@ class Proxy:
             elif isinstance(referrer, (FrameType, MethodType, tuple)):
                 pass
             else:
-                print("don't know how to patch", type(referrer))
+                warnings.warn(f"Don't know how to patch {type(referrer)}")
 
     def __getitem__(self, item):
         return Proxy(
@@ -111,12 +98,12 @@ class able:
 @type.__call__
 class ed:
     def __init__(self):
-        self.ables = []
+        self.batchables = []
 
     def __enter__(self):
-        self.ables.append(set())
-        sys._getframe().f_back.f_globals["my_ables_raeT9ahL"] = self.ables[-1]
+        self.batchables.append(set())
+        sys._getframe().f_back.f_locals["my_ables_raeT9ahL"] = self.batchables[-1]
 
     def __exit__(self, exc, exct, tb):
-        for a in self.ables.pop():
-            a.resolve()
+        for batchable in self.batchables.pop():
+            batchable.resolve()
