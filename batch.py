@@ -108,15 +108,15 @@ class able:
         self.unresolved = {}
 
 
-def ed(fn):
-    def wrapper(objs):
-        my_ables_raeT9ahL = set()
-        try:
-            for obj in objs:
-                yield fn(obj)
-        finally:
-            for a in my_ables_raeT9ahL:
-                a.resolve()
+@type.__call__
+class ed:
+    def __init__(self):
+        self.ables = []
 
-    fn.many = wrapper
-    return fn
+    def __enter__(self):
+        self.ables.append(set())
+        sys._getframe().f_back.f_globals["my_ables_raeT9ahL"] = self.ables[-1]
+    
+    def __exit__(self, exc, exct, tb):
+        for a in self.ables.pop():
+            a.resolve()

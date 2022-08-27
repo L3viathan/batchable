@@ -30,7 +30,6 @@ def brand_lookup(brand_ids):
     }
 
 
-@batch.ed
 def transform_offer(offer):
     shop = shop_lookup(offer["shop_id"])
     return {
@@ -46,9 +45,9 @@ print(shop_lookup(42))
 source = [{"offer_id": offer_id, "shop_id": offer_id + 100, "brand_id": offer_id % 4} for offer_id in range(23)]
 results = []
 
-for result in transform_offer.many(source):
-    print(result)
-    results.append(result)
+with batch.ed:
+    for row in source:
+        result = transform_offer(row)
+        print(result)
+        results.append(result)
 print(results)
-# print(list(transform_offer.many(source)))
-# print(transform_offer(source[0]))
