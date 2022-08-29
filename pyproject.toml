@@ -2,7 +2,12 @@
 name = "batchable"
 version = "0.2.1"
 description = "Hide your batch logic away from the actual code."
-authors = ["L3viathan <git@l3vi.de>"]
+authors = [
+    "L3viathan <git@l3vi.de>",
+    "digitalarbeiter <patrick.schemitz@digitalbriefkasten.de>",
+]
+readme = "README.md"
+repository = "https://github.com/L3viathan/batchable"
 packages = [
     {"include" = "batch.py"},
 ]
