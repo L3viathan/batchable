@@ -26,7 +26,7 @@ class Proxy:
                 for i, element in enumerate(referrer):
                     if element is self:
                         referrer[i] = self.call(target)
-            elif isinstance(referrer, (FrameType, MethodType, tuple)):
+            elif isinstance(referrer, (FrameType, MethodType)):
                 pass
             else:
                 warnings.warn(f"Don't know how to patch {type(referrer)}")
